@@ -1,3 +1,74 @@
+process_sc <- function() {
+  
+  # Select input files ---------------------------------------------------------
+  filenames <- list.files("data/input/", full.names = F) %>%
+    gsub(pattern = "Xls", replacement = "xls")
+  
+  if (length(filenames) == 0) {
+    stop("The data/input folder is empty. Try again.")
+  }
+  
+  # Process all data -----------------------------------------------------------
+  print("Preparing the data...")
+  file_info <- map(filenames, prepare_file_info)
+  
+  print("Performing quality control check...")
+  data_qc <- map(file_info, process_results)
+  
+  print("Preparing the plots...")
+  plots <- map2(file_info, data_qc, create_plots)
+  
+  # Prepare data for writing, write data ---------------------------------------
+  print("Writing the data to file (check the output folder!)...")
+  
+  timestamp <- format(Sys.time(), "%Y%m%d_%H%M_")
+  
+  # Save all of the plots in one pdf file
+  pdf_destination <- file.path(here(), "data/output/plots",
+                               paste0(timestamp, length(filenames), ".pdf"))
+  
+  pdf(file = pdf_destination)
+  
+  for (i in 1:length(plots)) {
+    plot(plots[[i]])
+  }
+  
+  dev.off() 
+  
+  # Combine all of the QCd data for easier viewing
+  data_qc <- bind_rows(data_qc)
+  
+  # To make more meaningful, readable flags
+  flag_replacement <- c("LL"  = "Linearly Low",
+                        "LH"  = "Linearly High",
+                        "EPL" = "End-Point Limit",
+                        "INV" = "Inverse Linearly Low",
+                        "><"  = "Out of Calibration Curve",
+                        "SS"  = "Short on Sample",
+                        "SR"  = "Short on Reagent",
+                        "H"   = "High",
+                        ","   = ", ")
+  
+  data_qc[c("Flags Dup 1", "Flags Dup 2")] <- 
+    apply(data_qc[c("Flags Dup 1", "Flags Dup 2")],
+          2,
+          function(x) str_replace_all(x, flag_replacement))
+  
+  write.csv(data_qc, file.path(here(), "data/output/processed_data/",
+                               paste0(timestamp, length(filenames), ".csv")),
+            row.names = FALSE)
+  
+  # So that the "data/input" folder is empty for the next runs of the script
+  print("Removing files in the input folder...")
+  options(warn = -1)
+  file.remove(list.files("data/input/", full.names = T))
+  options(warn = 0)
+  
+  print("Complete.")
+  
+}
+
+
 prepare_file_info <- function(filename) {
   
   path <- file.path("data/input", filename)
@@ -243,72 +314,3 @@ create_plots <- function(file_info, result_qc) {
   
 }
 
-process_sc <- function() {
-  
-  # Select input files ---------------------------------------------------------
-  filenames <- list.files("data/input/", full.names = F) %>%
-    gsub(pattern = "Xls", replacement = "xls")
-  
-  if (length(filenames) == 0) {
-    stop("The data/input folder is empty. Try again.")
-  }
-  
-  # Process all data -----------------------------------------------------------
-  print("Preparing the data...")
-  file_info <- map(filenames, prepare_file_info)
-  
-  print("Performing quality control check...")
-  data_qc <- map(file_info, process_results)
-  
-  print("Preparing the plots...")
-  plots <- map2(file_info, data_qc, create_plots)
-  
-  # Prepare data for writing, write data ---------------------------------------
-  print("Writing the data to file (check the output folder!)...")
-  
-  timestamp <- format(Sys.time(), "%Y%m%d_%H%M_")
-  
-  # Save all of the plots in one pdf file
-  pdf_destination <- file.path(here(), "data/output/plots",
-                               paste0(timestamp, length(filenames), ".pdf"))
-  
-  pdf(file = pdf_destination)
-  
-  for (i in 1:length(plots)) {
-    plot(plots[[i]])
-  }
-  
-  dev.off() 
-  
-  # Combine all of the QCd data for easier viewing
-  data_qc <- bind_rows(data_qc)
-  
-  # To make more meaningful, readable flags
-  flag_replacement <- c("LL"  = "Linearly Low",
-                        "LH"  = "Linearly High",
-                        "EPL" = "End-Point Limit",
-                        "INV" = "Inverse Linearly Low",
-                        "><"  = "Out of Calibration Curve",
-                        "SS"  = "Short on Sample",
-                        "SR"  = "Short on Reagent",
-                        "H"   = "High",
-                        ","   = ", ")
-  
-  data_qc[c("Flags Dup 1", "Flags Dup 2")] <- 
-    apply(data_qc[c("Flags Dup 1", "Flags Dup 2")],
-          2,
-          function(x) str_replace_all(x, flag_replacement))
-  
-  write.csv(data_qc, file.path(here(), "data/output/processed_data/",
-                               paste0(timestamp, length(filenames), ".csv")),
-            row.names = FALSE)
-  
-  # So that the "data/input" folder is empty for the next runs of the script
-  print("Removing files in the input folder...")
-  options(warn = -1)
-  file.remove(list.files("data/input/", full.names = T))
-  options(warn = 0)
-  
-  print("Complete.")
-  
-}
