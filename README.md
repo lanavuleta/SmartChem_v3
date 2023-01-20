@@ -16,7 +16,7 @@ Do not touch this file. Input used to run the scripts.
 
 ### data/input
 
-Place the raw GC files that you wish to process into this folder. Files will be erased from the folder upon completion of the script.
+Place the raw SC files that you wish to process into this folder. Files will be erased from the folder upon completion of the script.
 
 ### data/output/plots
 
