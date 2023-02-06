@@ -10,13 +10,15 @@ SmartChem processing code v3.
 
 ## Instructions
 
- 1) From the SmartChem Github page, go to <> Code -> Download ZIP. Unzip the folder.
- 2)  COPY the files you'd like to process in the "data/input" folder. This folder will be emptied upon completion of the script. If this is your first time using the tool, note that the input folder contains an example file for you to test.
- 3) Open RStudio. Go to File -> Open Project, and go to the downloaded SmartChem folder. Select SmartChem_v3.Rproj.
- 4) Go to File -> Open File, and select sc_run_me.R.
- 5) Select all code in the script (for example, by using Ctrl+a).
- 6) Run the code, either by clicking "Run" (button in the top right corner) or by pressing Ctrl+Enter.
- 7) Check the data/output file for results.
+ 1) Download R and RStudio. Follow the instructions at https://rstudio-education.github.io/hopr/starting.html.
+ 2) From the SmartChem Github page, go to <> Code -> Download ZIP. Unzip the folder.
+ 3) COPY the SmartChem files to process into the "data/input" folder. This folder will be emptied upon completion of the script. If this is your first time using the tool, the input folder contains an example file for you to test.
+ 4) Open RStudio.
+ 5) Go to File -> Open Project, and go to the downloaded SmartChem folder. Select SmartChem_v3.Rproj.
+ 6) Go to File -> Open File, and select sc_run_me.R.
+ 7) Select all code in the script (for example, by using Ctrl+a).
+ 8) Run the code, either by clicking "Run" (button in the top right corner) or by pressing Ctrl+Enter.
+ 9) Check the data/output file for results. Outputs are named as: runDate_runTime_numberOfInputFiles.
 
 ## Repo content information
 
@@ -38,5 +40,5 @@ Folder created upon script completion. Contains processed csv files.
 
 ### scripts
 
-Scripts for processing raw data into standard format. Use the sc_run_me.R script to process the files placed in the data/input folder (open it in RStudio and follow the instructions within).
+Scripts for processing raw data into standard format.
 
