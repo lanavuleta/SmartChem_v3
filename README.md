@@ -10,8 +10,9 @@ SmartChem processing code v3.
 
 ## Instructions
 
+ 0) Download R and RStudio by following the steps at https://rstudio-education.github.io/hopr/starting.html
  1) From the SmartChem Github page, go to <> Code -> Download ZIP. Unzip the folder.
- 2)  COPY the files you'd like to process in the "data/input" folder. This folder will be emptied upon completion of the script. If this is your first time using the tool, note that the input folder contains an example file for you to test.
+ 2) COPY the files you'd like to process in the "data/input" folder. This folder will be emptied upon completion of the script. If this is your first time using the tool, note that the input folder contains an example file for you to test.
  3) Open RStudio. Go to File -> Open Project, and go to the downloaded SmartChem folder. Select SmartChem_v3.Rproj.
  4) Go to File -> Open File, and select sc_run_me.R.
  5) Select all code in the script (for example, by using Ctrl+a).
@@ -38,5 +39,5 @@ Folder created upon script completion. Contains processed csv files.
 
 ### scripts
 
-Scripts for processing raw data into standard format. Use the sc_run_me.R script to process the files placed in the data/input folder (open it in RStudio and follow the instructions within).
+Scripts for processing raw data into standard format.
 
