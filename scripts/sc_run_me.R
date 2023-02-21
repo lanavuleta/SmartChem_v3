@@ -11,6 +11,6 @@
 source("scripts/sc_functions.R")
 source("scripts/sc_helper_functions.R")
 
-suppressWarnings(suppressMessages(load_packages()))
+suppressMessages(load_packages())
 
 process_sc()
