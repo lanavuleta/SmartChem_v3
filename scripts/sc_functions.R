@@ -367,13 +367,7 @@ create_plots <- function(file_info, result_qc) {
   run_date <- as.Date(substr(tail(unlist(str_split(path, "/")), 1), 1, 8), 
                       format = "%Y%m%d")
   
-  title <- paste(sc_method,
-                 # Get only the run name - do not include the date, method, 
-                 # or file extension
-                 str_remove(str_remove(tail(unlist(str_split(path, "/")), 1), 
-                                       "\\d+\\s-\\s[A-Za-z0-9]+\\s-\\s"), 
-                            "\\.xls"),
-                 sep = ": ")
+  title <- str_remove(tail(unlist(str_split(path, "/")), 1), "\\.xls")
   
   # Hide messages that warn us when linear model is applied on a small number
   # of points
