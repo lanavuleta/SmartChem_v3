@@ -13,7 +13,9 @@ process_sc <- function() {
   
   # Process all data -----------------------------------------------------------
   print("Preparing the data...")
-  file_info <- map(filenames, prepare_file_info)
+  # compact() used to remove info assigned NULL because the input file was
+  # skipped
+  file_info <- compact(map(filenames, prepare_file_info))
   
   print("Performing quality control check...")
   data_qc <- map(file_info, process_results)
@@ -30,7 +32,7 @@ process_sc <- function() {
   
   # Save all of the plots in one pdf file
   pdf_destination <- file.path(here(), "data/output/plots",
-                               paste0(timestamp, length(filenames), ".pdf"))
+                               paste0(timestamp, length(file_info), ".pdf"))
   
   pdf(file = pdf_destination)
   
@@ -59,7 +61,7 @@ process_sc <- function() {
           function(x) str_replace_all(x, flag_replacement))
   
   write.csv(data_qc, file.path(here(), "data/output/processed_data/",
-                               paste0(timestamp, length(filenames), ".csv")),
+                               paste0(timestamp, length(file_info), ".csv")),
             row.names = FALSE)
   
   # So that the "data/input" folder is empty for the next runs of the script
@@ -82,11 +84,18 @@ prepare_file_info <- function(filename) {
   sc_method <- parameters_by_test$test[str_which(filename, 
                                                  parameters_by_test$test)]
   
-  file_info <- c(path, sc_method)
-  names(file_info) <- c("path", "sc_method")
-  
-  return(file_info)
-  
+  if (is_empty(sc_method)) {
+    message(paste(sprintf("%s: There is an issue with this file. File is skipped.\n",
+                          filename),
+            "\tThis file might not be a SC output file.\n",
+            "\tAlternatively, the test being run might not be listed in",
+            " data/required/tests.xlsx. Check tests.xlsx\n")) 
+    return(NULL)
+  } else {
+    file_info <- c(path, sc_method)
+    names(file_info) <- c("path", "sc_method")
+    return(file_info)
+  }
 }
 
 process_results <- function(file_info) {
