@@ -167,7 +167,7 @@ process_results <- function(file_info) {
               
               `Flags Dup 1` = flags_dup(Concentration[1], Flags[1], mdl),
               `Flags Dup 2` = flags_dup(Concentration[2], Flags[2], mdl),
-              `High Val`    = max(method_runs$ref),
+              `High Calibration Standard` = max(method_runs$ref),
               
               # Following values yield important information about the runs
               `Concentration (mean)`        = round(mean(Concentration, na.rm = TRUE), 4),
@@ -185,7 +185,7 @@ process_results <- function(file_info) {
                                  RepeatNum[1])) %>%
     
     select(SampleID, Test, `Concentration (mean)`:`Concentration (relative sd)`,
-           `Abs Dup 1`:`High Val`, `Flags`, Position, DateTime) %>%
+           `Abs Dup 1`:`High Calibration Standard`, `Flags`, Position, DateTime) %>%
     mutate(MDL = mdl,
            `Source File` = tail(unlist(str_split(file_info[["path"]], "/")), 1)) %>%
     # So that order is the same as in original file

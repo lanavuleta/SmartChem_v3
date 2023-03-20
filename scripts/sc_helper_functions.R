@@ -84,7 +84,7 @@ flags_dup <- function(conc, flags_og, mdl) {
     flags <- c(flags, "Run was not completed")
   } else {
     if (conc < 0) {
-      flags <- c(flags, sprintf("< 0 (og value: %.3f)", conc))
+      flags <- c(flags, sprintf("< 0 (actual value: %.3f)", conc))
     }
     
     if (conc < mdl) {
@@ -128,11 +128,11 @@ flags_sc <- function(conc_pd, flags_og, conc_dup1, conc_dup2, mdl, repeat_num) {
   
   if (!is.na(conc_pd)) {
     if (abs(conc_pd) > 10 & conc_dup1 >= mdl & conc_dup2 >= mdl) {
-      flags <- c(flags, "Perc difference > 10 - Both conc above MDL")
+      flags <- c(flags, "Perc difference > 10 & both conc above MDL")
     }
     
     if (abs(conc_pd) > 10 & (conc_dup1 < mdl  | conc_dup2 < mdl )) {
-      flags <- c(flags, "Perc difference > 10 - One or both conc below MDL")
+      flags <- c(flags, "Perc difference > 10 & one or both conc below MDL")
     }
     
     if (abs(conc_pd) <= 10 & (conc_dup1 < mdl  & conc_dup2 < mdl )) {
