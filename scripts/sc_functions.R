@@ -45,10 +45,10 @@ process_sc <- function() {
   data_qc <- bind_rows(data_qc)
   
   # To make more meaningful, readable flags
-  flag_replacement <- c("LL"  = "Linearly Low",
-                        "LH"  = "Linearly High",
+  flag_replacement <- c("LL"  = "Linearity Low",
+                        "LH"  = "Linearity High",
                         "EPL" = "End-Point Limit",
-                        "INV" = "Inverse Linearly Low",
+                        "INV" = "Inversion",
                         "><"  = "Out of Calibration Curve",
                         "SS"  = "Short on Sample",
                         "SR"  = "Short on Reagent",
