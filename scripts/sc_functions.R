@@ -157,7 +157,7 @@ process_results <- function(file_info) {
     # the max and min Dil Ratios. If max and min Dil Ratio = 5, no rerun occurred,
     # even though Dil Ratio != 1
     mutate(Reruns = case_when(max(`Dil Ratio`) != min(`Dil Ratio`) & 
-                              `Dil Ratio` == max(`Dil Ratio`)       ~ "Rerun",
+                              `Dil Ratio` == max(`Dil Ratio`)       ~ "Rerun dilution",
                               TRUE ~ "")) %>%
     filter(`Dil Ratio` == max(`Dil Ratio`)) %>%
     group_split() %>%
