@@ -24,7 +24,7 @@ SmartChem processing code v3.
 
 ### data/required
 
-Do not touch this file. Input used to run the scripts.
+Contains the file used to identify and store info about the different tests run by SmartChem.
 
 ### data/input
 
