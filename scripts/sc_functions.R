@@ -335,25 +335,7 @@ create_plots <- function(file_info, result_qc) {
                    vjust = "inward", hjust = "inward"),       colour = "blue3") 
   
   options(warn = 0)
-  
-  # Calculate coil efficiency over duration of run (NOx only) and plot results
-  if (sc_method == "BNO3") {  
-    
-    coil_effic <- controls %>% 
-      filter(grepl("CCN", SampleID)) %>% 
-      mutate(cd_coil_effic = (Abs/Nominal)/(lag(Abs)/lag(Nominal))) %>% 
-      filter(SampleID == "CCN3") 
-    
-    plot_coil_effic <- coil_effic %>%   
-      ggplot(aes(x = RunTime, y = cd_coil_effic)) + 
-      geom_point(na.rm = TRUE) + 
-      geom_line(na.rm = TRUE) +
-      scale_y_continuous(limits = c(.75, 1)) +
-      ggtitle(label = "Cd Coil Efficiency") +
-      scale_x_datetime(date_labels = "%H:%M")
-    
-  }
-  
+
   # Creating final, combined plot ----------------------------------------------
   
   # plot_controls in particular can throw warnings depending on if there are too
@@ -364,18 +346,9 @@ create_plots <- function(file_info, result_qc) {
                                              ncol = 1))
   
   if (exists("plot_calibration_curve")) {
-    if (exists("plot_coil_effic")) {
-      plot_extras <- arrangeGrob(plot_calibration_curve, plot_coil_effic, 
-                                 ncol = 1)
-    } else {
       plot_extras <- plot_calibration_curve
-    }
   } else {
-    if (exists("plot_coil_effic")) {
-      plot_extras <- plot_coil_effic
-    } else {
-      plot_extras <- NA
-    }
+    plot_extras <- NA
   }
   
   # Filenames begin with 8 digits indicating the run date
