@@ -8,7 +8,8 @@ process_sc <- function() {
     gsub(pattern = "Xls", replacement = "xls")
   
   if (length(filenames) == 0) {
-    stop("The data/input folder is empty. Try again.")
+    stop("The data/input folder is empty. Try again.",
+         call. = FALSE)
   }
   
   # Process all data -----------------------------------------------------------
@@ -16,6 +17,11 @@ process_sc <- function() {
   # compact() used to remove info assigned NULL because the input file was
   # skipped
   file_info <- compact(map(filenames, prepare_file_info))
+  
+  if (length(file_info) == 0) {
+    stop("None of the input files are valid. Cancelling.",
+         call. = FALSE)
+  }
   
   print("Performing quality control check...")
   data_qc <- map(file_info, process_results)
@@ -89,7 +95,7 @@ prepare_file_info <- function(filename) {
                           filename),
             "\tThis file might not be a SC output file.\n",
             "\tAlternatively, the test being run might not be listed in",
-            " data/required/tests.xlsx. Check tests.xlsx\n")) 
+            "data/required/tests.xlsx. Check tests.xlsx\n")) 
     return(NULL)
   } else {
     file_info <- c(path, sc_method)
@@ -253,15 +259,15 @@ create_plots <- function(file_info, result_qc) {
                      ")")
     
     plot_calibration_curve <- calibrants %>% 
-      ggplot(aes(Abs, Concentration)) +
+      ggplot(aes(Concentration, Abs)) +
       geom_point(na.rm = TRUE) +
       geom_smooth(method = "lm", na.rm = TRUE) +
-      geom_text(aes(min(Abs), max(Concentration), label = lm_eqn, 
+      geom_text(aes(min(Concentration), max(Abs), label = lm_eqn, 
                      vjust = "inward", hjust = "inward")) +
       ggtitle(label = paste0("Calibrant Report: R^2 = ", 
                              round(summary(lm)$r.squared, 4))) +
       geom_hline(yintercept = rbl_mean, linetype = "longdash") +
-      geom_text(aes(max(Abs), rbl_mean, label = "Mean RBL", 
+      geom_text(aes(max(Concentration), rbl_mean, label = "Mean RBL", 
                     vjust = "inward", hjust = "inward"))
     
     options(warn = 0)
