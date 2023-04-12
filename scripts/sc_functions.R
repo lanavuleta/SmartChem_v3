@@ -14,9 +14,29 @@ process_sc <- function() {
   
   # Process all data -----------------------------------------------------------
   print("Preparing the data...")
-  # compact() used to remove info assigned NULL because the input file was
-  # skipped
-  file_info <- compact(map(filenames, prepare_file_info))
+  
+  tests <- read_xlsx("data/required/tests.xlsx")
+  
+  match_rows <- map(filenames, find_match_row, tests)
+  
+  # Remove faulty files (message throws in match_rows) to process only proper
+  # input files
+  filenames  <- filenames[-which(is.na(match_rows))]
+  match_rows <- match_rows[-which(is.na(match_rows))]
+  
+  file_info <- map2(filenames, match_rows, prepare_file_info, tests)
+  
+  mdls      <- map2(file_info, match_rows, get_mdl, tests)
+  mdl_dates <- map2(file_info, match_rows, get_mdl_date, tests)
+  
+  if (any(unlist(map(mdl_dates, check_mdl_date)))) {
+    warning(paste("Some of the lab-calculated MDLs being used are greater than",
+                  "1 year old.\nSee 'data/required/tests.xlsx to identify",
+                  "the MDLs currently being used and their calculation date.",
+                  "\nIf an MDL should be replaced, check",
+                  "'GIWS1/Helen_Lab/SmartChem/SampleMDLs.xlsx' to see if a",
+                  "newer MDL exists."))
+  }
   
   if (length(file_info) == 0) {
     stop("None of the input files are valid. Cancelling.",
@@ -24,10 +44,10 @@ process_sc <- function() {
   }
   
   print("Performing quality control check...")
-  data_qc <- map(file_info, process_results)
+  data_qc <- pmap(list(file_info, mdls, mdl_dates), process_results)
   
   print("Preparing the plots...")
-  plots <- map2(file_info, data_qc, create_plots)
+  plots <- pmap(list(file_info, data_qc, mdls), create_plots)
   
   # Prepare data for writing and write data ------------------------------------
   print("Writing the data to file (check the output folder!)...")
@@ -81,30 +101,38 @@ process_sc <- function() {
 }
 
 
-prepare_file_info <- function(filename) {
+find_match_row <- function(filename, tests) {
+  
+  match_row <- str_which(filename, tests$test)
+  
+  if (is_empty(match_row)) {
+    message(paste(sprintf("%s: There is an issue with this file. File is skipped.\n",
+                          filename),
+                  "\tThis file might not be a SC output file.\n",
+                  "\tAlternatively, the test being run might not be listed in",
+                  "data/required/tests.xlsx. Check tests.xlsx. Note that SC",
+                  "file detection is case-sensitive.\n")) 
+    return(NA)
+  } else {
+    return(match_row)
+  }
+  
+}
+
+prepare_file_info <- function(filename, match_row, tests) {
   
   path <- file.path("data/input", filename)
   
-  parameters_by_test <- read_xlsx("data/required/tests.xlsx")
+  sc_method <- tests$test[match_row]
+    
+  file_info <- c(path, sc_method)
+  names(file_info) <- c("path", "sc_method")
   
-  sc_method <- parameters_by_test$test[str_which(filename, 
-                                                 parameters_by_test$test)]
-  
-  if (is_empty(sc_method)) {
-    message(paste(sprintf("%s: There is an issue with this file. File is skipped.\n",
-                          filename),
-            "\tThis file might not be a SC output file.\n",
-            "\tAlternatively, the test being run might not be listed in",
-            "data/required/tests.xlsx. Check tests.xlsx\n")) 
-    return(NULL)
-  } else {
-    file_info <- c(path, sc_method)
-    names(file_info) <- c("path", "sc_method")
-    return(file_info)
-  }
+  return(file_info)
+    
 }
 
-process_results <- function(file_info) {
+process_results <- function(file_info, mdl, mdl_date) {
   
   # Read in worksheets ---------------------------------------------------------
 
@@ -128,17 +156,6 @@ process_results <- function(file_info) {
   
   # Result processing ----------------------------------------------------------
 
-  # mdl = Method detection limit
-  mdl <- file_info[["path"]] %>%
-    read_excel(sheet = 2) %T>%
-    # There are some files with "***" as concentration. as.numeric() to set 
-    # those to NA
-    {options(warn = -1)} %>% 
-    mutate(Concentration = as.numeric(Concentration)) %T>%
-    {options(warn = 0)} %>%
-    filter(SampleID == "STND", !is.na(`Concentration`)) %>%
-    with(sd(Concentration)*qt(c(.95), df = (length(Concentration) - 1)))
-  
   # Want to see the max of the calibration curve for easier interpretation of 
   # "High" flags
   method_runs <- file_info[["path"]] %>%
@@ -202,6 +219,10 @@ process_results <- function(file_info) {
     select(SampleID, Test, `Concentration (mean)`:`Concentration (relative sd)`,
            `Abs Dup 1`:`High Calibration Standard`, `Flags`, Position, DateTime) %>%
     mutate(MDL = mdl,
+           `MDL Calculation Date` = mdl_date,
+           `MDL Source` = ifelse(!is.na(`MDL Calculation Date`), 
+                                 "Lab Calculated",
+                                 "Script Calculated"),
            `Source File` = tail(unlist(str_split(file_info[["path"]], "/")), 1)) %>%
     # So that order is the same as in original file
     arrange(DateTime)
@@ -210,7 +231,7 @@ process_results <- function(file_info) {
  
 } 
 
-create_plots <- function(file_info, result_qc) {
+create_plots <- function(file_info, result_qc, mdl) {
   
   path <- file_info[["path"]]
   sc_method <- file_info[["sc_method"]]
@@ -302,16 +323,6 @@ create_plots <- function(file_info, result_qc) {
   # Because these nominals are showed in the control plot below
   nominal_min <- min(controls$Nominal)
   nominal_max <- max(controls$Nominal)
-  
-  # Because we display the mdl (Method detection limit) on the control plot below
-  mdl <- controls %T>%
-    # There are some files with "***" as concentration. as.numeric() to set 
-    # those to NA
-    {options(warn = -1)} %>% 
-    mutate(Concentration = as.numeric(Concentration)) %T>%
-    {options(warn = 0)} %>%
-    filter(SampleID == "STND", !is.na(`Concentration`)) %>%
-    with(sd(Concentration)*qt(c(.95), df = (length(Concentration) - 1)))
 
   # Hide messages printed by geom_smooth
   options(warn = -1)

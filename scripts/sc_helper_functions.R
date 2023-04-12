@@ -19,6 +19,40 @@ load_packages <- function() {
   
 }
 
+get_mdl <- function(file_info, match_row, tests) {
+  
+  # mdl = Method detection limit
+  mdl <- tests$mdl_lab[match_row]
+  
+  if (is.na(mdl)) {
+    
+    # There is no lab-calculated MDL. Use script-calculated MDL instead
+    mdl <- file_info[["path"]] %>%
+      read_excel(sheet = 2) %T>%
+      # There are some files with "***" as concentration. as.numeric() to set 
+      # those to NA
+      {options(warn = -1)} %>% 
+      mutate(Concentration = as.numeric(Concentration)) %T>%
+      {options(warn = 0)} %>%
+      filter(SampleID == "STND", !is.na(`Concentration`)) %>%
+      with(sd(Concentration)*qt(c(.95), df = (length(Concentration) - 1)))
+    
+  } 
+  return(mdl)
+}
+
+get_mdl_date <- function(file_info, match_row, tests) {
+  mdl_date <- tests$mdl_lab_date[match_row]
+}
+
+check_mdl_date <- function(mdl_date) {
+  if (!is.na(mdl_date)) {
+    if (abs(time_length(difftime(mdl_date, Sys.Date()), "years")) > 1) {
+      return(TRUE)
+    }
+  }
+}
+
 check_for_dups <- function(data) {
   # Note that when a sample's runs look like "Sample", "Sample_Dup", this
   # script refers to the "Sample" run as dup1, the "Sample_Dup" run as dup2
