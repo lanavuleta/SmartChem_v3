@@ -18,13 +18,13 @@ SmartChem processing code v3.
  6) Go to File -> Open File, and select sc_run_me.R.
  7) Select all code in the script (for example, by using Ctrl+a).
  8) Run the code, either by clicking "Run" (button in the top right corner) or by pressing Ctrl+Enter.
- 9) Check the data/output file for results. Outputs are named as: runDate_runTime_numberOfInputFiles.
+ 9) Check the data/output file for results. Outputs are named as: runDate_runTime_numberOfProcessedFiles.
 
 ## Repo content information
 
 ### data/required
 
-Contains the file used to identify and store info about the different tests run by SmartChem.
+Contains the file used to identify and store info about the different tests run by SmartChem, including their associated MDLs.
 
 ### data/input
 
