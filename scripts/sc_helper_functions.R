@@ -19,6 +19,36 @@ load_packages <- function() {
   
 }
 
+check_tests <- function(tests) {
+  counts <- tests %>% 
+    group_by(test) %>% 
+    summarise(n = n())
+  
+  if (any(counts$n != 1)) {
+    stop(paste("Issues with tests.xlsx. Each test should only occur once in",
+               "the file. Remove repeats."),
+         call. = FALSE)
+  }
+}
+
+find_match_row <- function(filename, tests) {
+  
+  match_row <- str_which(filename, tests$test)
+  
+  if (is_empty(match_row)) {
+    message(paste(sprintf("%s: There is an issue with this file. File is skipped.\n",
+                          filename),
+                  "\tThis file might not be a SC output file.\n",
+                  "\tAlternatively, the test being run might not be listed in",
+                  "data/required/tests.xlsx. Check tests.xlsx. Note that SC",
+                  "file detection is case-sensitive.\n")) 
+    return(NA)
+  } else {
+    return(match_row)
+  }
+  
+}
+
 get_mdl <- function(file_info, match_row, tests) {
   
   # mdl = Method detection limit

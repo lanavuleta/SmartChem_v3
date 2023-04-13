@@ -17,12 +17,16 @@ process_sc <- function() {
   
   tests <- read_xlsx("data/required/tests.xlsx")
   
+  check_tests(tests)
+  
   match_rows <- map(filenames, find_match_row, tests)
   
   # Remove faulty files (message throws in match_rows) to process only proper
   # input files
-  filenames  <- filenames[-which(is.na(match_rows))]
-  match_rows <- match_rows[-which(is.na(match_rows))]
+  if (any(is.na(match_rows))) {
+    filenames  <- filenames[-which(is.na(match_rows))]
+    match_rows <- match_rows[-which(is.na(match_rows))]
+  }
   
   file_info <- map2(filenames, match_rows, prepare_file_info, tests)
   
@@ -35,7 +39,8 @@ process_sc <- function() {
                   "the MDLs currently being used and their calculation date.",
                   "\nIf an MDL should be replaced, check",
                   "'GIWS1/Helen_Lab/SmartChem/SampleMDLs.xlsx' to see if a",
-                  "newer MDL exists."))
+                  "newer MDL exists."),
+            call. = FALSE)
   }
   
   if (length(file_info) == 0) {
@@ -97,25 +102,6 @@ process_sc <- function() {
   options(warn = 0)
   
   print("Complete.")
-  
-}
-
-
-find_match_row <- function(filename, tests) {
-  
-  match_row <- str_which(filename, tests$test)
-  
-  if (is_empty(match_row)) {
-    message(paste(sprintf("%s: There is an issue with this file. File is skipped.\n",
-                          filename),
-                  "\tThis file might not be a SC output file.\n",
-                  "\tAlternatively, the test being run might not be listed in",
-                  "data/required/tests.xlsx. Check tests.xlsx. Note that SC",
-                  "file detection is case-sensitive.\n")) 
-    return(NA)
-  } else {
-    return(match_row)
-  }
   
 }
 
