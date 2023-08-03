@@ -1,7 +1,7 @@
 ################################################################################
 ## SmartChem processing code
 
-# Contact Lana Vuleta (lana.vuleta@usask.ca) with questions
+# Contact Lana Vuleta (lana.j.vuleta@gmail.com) with questions
 # Code based on scripts from Jared Wolfe and Colin Whitfield
 
 ################################################################################
