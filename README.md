@@ -6,7 +6,7 @@ SmartChem processing code v3.
 
 ## Highly Qualified Personnel
 
-- Lana Vuleta, lana.jovanka@gmail.com
+- Lana Vuleta, lana.j.vuleta@gmail.com
 - Colin Whitfield, colin
 
 ## Instructions
